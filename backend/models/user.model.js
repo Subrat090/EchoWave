@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import redisClient from "../services/redis.service.js";
 
 const userSchema = new mongoose.Schema({
     email: {
@@ -30,9 +31,9 @@ userSchema.methods.isValidPassword = async function (password) {
 
 userSchema.methods.generateJWT = function () {
     return jwt.sign(
-        { email: this.email },
-        process.env.JWT_SECRET,
-        { expiresIn: '24h' }
+        { email: this.email },//Payload
+        process.env.JWT_SECRET,//secretkey
+        { expiresIn: '24h' }//options
     );
 }
 

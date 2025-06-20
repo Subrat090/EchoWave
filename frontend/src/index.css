@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  background-color: #111827 !important; /* This is the same as bg-gray-900 */
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #111827 !important;
+}
+
+.message-box{
+  scroll-behavior: smooth;
+}
+.message-box::-webkit-scrollbar{
+  display: none;
+}
