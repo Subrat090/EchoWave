@@ -2,7 +2,26 @@ import React, { useState, useContext,useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../config/axios.js';
 import { UserContext } from '../context/user.context'
+import { initializeSocket,receiveMessage,sendMessage } from '../config/socket.js';
+import { useRef } from 'react';
+import Markdown from 'markdown-to-jsx'
+import hljs from 'highlight.js';
+import { getWebContainer } from '../config/webContainer.js';
+import { Container } from 'lucide-react';
+function SyntaxHighlightedCode(props) {
+    const ref = useRef(null)
 
+    React.useEffect(() => {
+        if (ref.current && props.className?.includes('lang-') && window.hljs) {
+            window.hljs.highlightElement(ref.current)
+
+            // hljs won't reprocess the element unless this attribute is removed
+            ref.current.removeAttribute('data-highlighted')
+        }
+    }, [ props.className, props.children ])
+
+    return <code {...props} ref={ref} />
+}
 const Project = () => {
     const location = useLocation();
 
@@ -12,6 +31,16 @@ const Project = () => {
     const [users, setUsers] = useState([]);
     const { user } = useContext(UserContext);
     const [project,setProject] = useState(location.state.project);
+const [message,setMessage] = useState('');
+const messageBox = React.createRef();
+ const [ messages, setMessages ] = useState([]) 
+ const [currentFile,setCurrentFile] = useState(null);
+ const [ openFiles, setOpenFiles ] = useState([])
+ const [webContainer,setWebContainer] = useState(null);
+
+ const [fileTree ,setFileTree] =  useState({
+ })
+
 
     const handleUserClick = (id) => {
     setSelectedUserId((prev) => {
@@ -24,8 +53,55 @@ const Project = () => {
         return newSet;
     });
 };
+const send= ()=>{
+  
+    sendMessage('project-message',{
+        message,
+        sender :user
+    })
+   // appendOutgoingMessage(message);
+   setMessages(prevMessages => [ ...prevMessages, { sender: user, message } ]) // Update messages state
+        setMessage("")
+}
 
+function WriteAiMessage(message) {
+
+        const messageObject = JSON.parse(message)
+
+        return (
+            <div
+                className='overflow-auto bg-slate-950 text-white rounded-sm p-2'
+            >
+                <Markdown
+                    children={messageObject.text}
+                    options={{
+                        overrides: {
+                            code: SyntaxHighlightedCode,
+                        },
+                    }}
+                />
+            </div>)
+    }
     useEffect(() => {
+        initializeSocket(project._id);
+
+        if(!webContainer){
+            getWebContainer().then(container=>{
+                setWebContainer(container)
+                console.log("container started")
+            })
+        }
+        receiveMessage('project-message',data=>{
+         //   console.log(data)
+           // appendIncomingMessage(data);
+           const message = JSON.parse (data.message)
+           console.log(JSON.parse (data.message))
+      webContainer?.mount(message.fileTree)
+           if(message.fileTree){
+            setFileTree(message.fileTree || {})
+           }
+              setMessages(prevMessages => [ ...prevMessages, data ])
+        })
 
         axios.get(`/project/get-project/${location.state.project._id}`).then(res => {
 
@@ -63,6 +139,11 @@ const Project = () => {
     }
 
 
+
+
+
+
+
     return (
         <main className="h-screen w-screen flex">
             <section className="left flex flex-col h-full min-w-96 bg-red-400">
@@ -76,22 +157,30 @@ const Project = () => {
                     </button>
                 </header>
 
-                <div className="conversation-area pt-14 pb-10 flex-grow flex flex-col h-full relative">
-                    <div className="message-box flex flex-col">
-                        <div className="incoming message max-w-56 flex flex-col p-2 bg-white w-fit rounded-lg">
-                            <small className="opacity-65 text-xs">example@gmail.com</small>
-                            <p className="text-sm"> hello;</p>
-                        </div>
-                        <div className="outgoing ml-auto max-w-56 message flex flex-col p-2 bg-white w-fit rounded-lg">
-                            <small className="opacity-65 text-xs">example@gmail.com</small>
-                            <p className="text-sm">
-                                hellokkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk;
-                            </p>
-                        </div>
+                    <div className="conversation-area pt-14 pb-10 flex-grow flex flex-col h-full relative">
+
+                    <div
+                        ref={messageBox}
+                        className="message-box p-1 flex-grow flex flex-col gap-1 overflow-auto max-h-full scrollbar-hide">
+                        {messages.map((msg, index) => (
+                            <div key={index} className={`${msg.sender._id === 'ai' ? 'max-w-80' : 'max-w-52'} ${msg.sender._id == user._id.toString() && 'ml-auto'}  message flex flex-col p-2 bg-slate-50 w-fit rounded-md`}>
+                                <small className='opacity-65 text-xs'>{msg.sender.email}</small>
+                                <div className='text-sm'>
+                                    {msg.sender._id === 'ai' ?
+                                        WriteAiMessage(msg.message)
+                                        : <p>{msg.message}</p>}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                     <div className="inputField w-full flex">
-                        <input type="text" placeholder="Type a message" className="p-2 px-4 border-none outline-none flex-grow" />
-                        <button className="px-5">
+                        <input 
+                        value = {message} 
+                        onChange={(e)=>setMessage(e.target.value)}
+                        
+                        type="text" placeholder="Type a message" className="p-2 px-4 border-none outline-none flex-grow" />
+                        <button 
+                        onClick={send} className="px-5">
                             <i className="ri-send-plane-fill"></i>
                         </button>
                     </div>
@@ -127,6 +216,99 @@ const Project = () => {
                 </div>
             </section>
 
+            <section className='right bg-red-50 fle-grow h-full flex'>
+
+<div className='explorer h-full max-w-100 min-w-56 bg-slate-200'>
+
+
+    <div className='file-tree w-full'>
+ {
+    Object.keys(fileTree).map((file,index)=>(
+
+        <button className='   tre-element p-2 px-4 flex items-center gap-2 bg-slate-200 w-full ' onClick={()=>{
+            setCurrentFile(file)
+              setOpenFiles([ ...new Set([ ...openFiles, file ]) ])
+        }}>
+            
+
+
+    <p className='cursor-pointer font-semibold text-lg'>
+
+        {file}
+    </p>
+</button>
+    ))
+ }
+
+
+    </div>
+</div>
+{currentFile&&(
+
+
+<div className='code-editor flex flex-col flex-grow h-full'>
+
+<div className='top flex'>
+  {
+    openFiles.map((file, index) => (
+      <button
+        key={index}
+        onClick={() => setCurrentFile(file)}
+        className={`open-file cursor-pointer p-2 px-4 flex items-center w-fit gap-2 bg-slate-200 ${currentFile === file ? 'bg-white border-b-2 border-blue-500' : ''}`}
+      >
+        <p className='font-semibold text-lg'>
+          {file}
+        </p>
+      </button>
+    ))
+  }
+</div>
+
+ <div className="bottom flex flex-grow max-w-full shrink overflow-auto">
+                        {
+                            fileTree[ currentFile ] && (
+                                <div className="code-editor-area h-full overflow-auto flex-grow bg-slate-50">
+                                    <pre
+                                        className="hljs h-full">
+                                        <code
+                                            className="hljs h-full outline-none"
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                            onBlur={(e) => {
+                                                const updatedContent = e.target.innerText;
+                                                const ft = {
+                                                    ...fileTree,
+                                                    [ currentFile ]: {
+                                                        file: {
+                                                            contents: updatedContent
+                                                        }
+                                                    }
+                                                }
+                                                setFileTree(ft)
+                                                saveFileTree(ft)
+                                            }}
+                                            dangerouslySetInnerHTML={{ __html: hljs.highlight('javascript', fileTree[ currentFile ].file.contents).value }}
+                                            style={{
+                                                whiteSpace: 'pre-wrap',
+                                                paddingBottom: '25rem',
+                                                counterSet: 'line-numbering',
+                                            }}
+                                        />
+                                    </pre>
+                                </div>
+                            )
+                        }
+                    </div>
+</div>
+
+)}
+
+
+
+
+
+            </section>
+
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-4 rounded-md w-96 max-w-full relative">
@@ -159,4 +341,4 @@ const Project = () => {
     );
 };
 
-export default Project;
+export default Project; 
