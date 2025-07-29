@@ -48,6 +48,11 @@ const Project = () => {
 
     const [ runProcess, setRunProcess ] = useState(null)
 
+    // Mobile responsive states
+    const [ isMobileMenuOpen, setIsMobileMenuOpen ] = useState(false)
+    const [ activeTab, setActiveTab ] = useState('chat') // 'chat', 'code', 'preview'
+    const [ isExplorerOpen, setIsExplorerOpen ] = useState(true)
+
     const handleUserClick = (id) => {
         setSelectedUserId(prevSelectedUserId => {
             const newSelectedUserId = new Set(prevSelectedUserId);
@@ -59,45 +64,34 @@ const Project = () => {
 
             return newSelectedUserId;
         });
-
-
     }
 
-
     function addCollaborators() {
-
-        axios.put("/projects/add-user", {
+        axios.put("/project/add-user", {
             projectId: location.state.project._id,
             users: Array.from(selectedUserId)
         }).then(res => {
             console.log(res.data)
             setIsModalOpen(false)
-
         }).catch(err => {
             console.log(err)
         })
-
     }
 
     const send = () => {
-
         sendMessage('project-message', {
             message,
             sender: user
         })
         setMessages(prevMessages => [ ...prevMessages, { sender: user, message } ]) // Update messages state
         setMessage("")
-
     }
 
     function WriteAiMessage(message) {
-
         const messageObject = JSON.parse(message)
 
         return (
-            <div
-                className='overflow-auto bg-slate-950 text-white rounded-sm p-2'
-            >
+            <div className='overflow-auto bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white rounded-xl p-3 sm:p-4 shadow-lg border border-purple-500/20'>
                 <Markdown
                     children={messageObject.text}
                     options={{
@@ -110,7 +104,6 @@ const Project = () => {
     }
 
     useEffect(() => {
-
         initializeSocket(project._id)
 
         if (!webContainer) {
@@ -120,16 +113,11 @@ const Project = () => {
             })
         }
 
-
         receiveMessage('project-message', data => {
-
             console.log(data)
             
             if (data.sender._id == 'ai') {
-
-
                 const message = JSON.parse(data.message)
-
                 console.log(message)
 
                 webContainer?.mount(message.fileTree)
@@ -139,32 +127,40 @@ const Project = () => {
                 }
                 setMessages(prevMessages => [ ...prevMessages, data ]) // Update messages state
             } else {
-
-
                 setMessages(prevMessages => [ ...prevMessages, data ]) // Update messages state
             }
         })
 
-
          axios.get(`/project/get-project/${location.state.project._id}`).then(res => {
-
             console.log(res.data.project)
-
             setProject(res.data.project)
             setFileTree(res.data.project.fileTree || {})
         })
 
         axios.get('/users/all').then(res => {
-
             setUsers(res.data.users)
-
         }).catch(err => {
-
             console.log(err)
-
         })
-
     }, [])
+
+    // Update syntax highlighting when file content changes
+    useEffect(() => {
+        if (currentFile && fileTree[currentFile] && window.hljs) {
+            const highlightedElement = document.querySelector('.hljs code');
+            if (highlightedElement) {
+                const content = fileTree[currentFile].file.contents;
+                const highlighted = hljs.highlight('javascript', content).value;
+                highlightedElement.innerHTML = highlighted;
+            }
+        }
+    }, [currentFile, fileTree])
+    useEffect(() => {
+  if (messageBox.current) {
+    messageBox.current.scrollTop = messageBox.current.scrollHeight;
+  }
+}, [messages]);
+
 
     function saveFileTree(ft) {
         axios.put('/project/update-file-tree', {
@@ -177,135 +173,214 @@ const Project = () => {
         })
     }
 
-
-    // Removed appendIncomingMessage and appendOutgoingMessage functions
-
     function scrollToBottom() {
         messageBox.current.scrollTop = messageBox.current.scrollHeight
     }
 
     return (
-        <main className='h-screen w-screen flex'>
-            <section className="left relative flex flex-col h-screen min-w-96 bg-slate-300">
-                <header className='flex justify-between items-center p-2 px-4 w-full bg-slate-100 absolute z-10 top-0'>
-                    <button className='flex gap-2' onClick={() => setIsModalOpen(true)}>
-                        <i className="ri-add-fill mr-1"></i>
-                        <p>Add collaborator</p>
+        <main className='h-screen w-screen flex flex-col lg:flex-row bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 overflow-hidden'>
+            {/* Mobile Tab Navigation */}
+            <div className="lg:hidden bg-white/95 backdrop-blur-sm border-b border-gray-200 flex justify-around items-center p-2 z-20">
+                <button
+                    onClick={() => setActiveTab('chat')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
+                        activeTab === 'chat' 
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                            : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                >
+                    <i className="ri-chat-3-line text-lg"></i>
+                    <span className="text-sm">Chat</span>
+                </button>
+                <button
+                    onClick={() => setActiveTab('code')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
+                        activeTab === 'code' 
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                            : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                >
+                    <i className="ri-code-line text-lg"></i>
+                    <span className="text-sm">Code</span>
+                </button>
+                {iframeUrl && (
+                    <button
+                        onClick={() => setActiveTab('preview')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
+                            activeTab === 'preview' 
+                                ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                                : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                    >
+                        <i className="ri-eye-line text-lg"></i>
+                        <span className="text-sm">Preview</span>
                     </button>
-                    <button onClick={() => setIsSidePanelOpen(!isSidePanelOpen)} className='p-2'>
-                        <i className="ri-group-fill"></i>
+                )}
+            </div>
+
+            {/* Chat Section */}
+            <section className={`${activeTab === 'chat' ? 'flex' : 'hidden'} lg:flex relative flex-col h-full lg:h-screen w-full lg:min-w-80 lg:max-w-md xl:min-w-96 bg-gradient-to-b from-white/95 to-gray-50/95 backdrop-blur-sm border-r border-white/20 shadow-2xl`}>
+                <header className='flex justify-between items-center p-3 sm:p-4 lg:px-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg'>
+                    <button className='flex gap-2 items-center bg-white/20 backdrop-blur-sm px-3 py-2 sm:px-4 rounded-lg hover:bg-white/30 transition-all duration-300 text-white font-medium text-sm sm:text-base' onClick={() => setIsModalOpen(true)}>
+                        <i className="ri-add-fill text-base sm:text-lg"></i>
+                        <span className="hidden sm:inline">Add Collaborator</span>
+                        <span className="sm:hidden">Add</span>
+                    </button>
+                    <button onClick={() => setIsSidePanelOpen(!isSidePanelOpen)} className='p-2 sm:p-3 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-all duration-300 text-white'>
+                        <i className="ri-group-fill text-base sm:text-lg"></i>
                     </button>
                 </header>
-                <div className="conversation-area pt-14 pb-10 flex-grow flex flex-col h-full relative">
 
+                <div className="conversation-area flex-grow flex flex-col h-full relative overflow-hidden">
                     <div
                         ref={messageBox}
-                        className="message-box p-1 flex-grow flex flex-col gap-1 overflow-auto max-h-full scrollbar-hide">
+                        className="message-box p-3 sm:p-4 flex-grow flex flex-col gap-2 sm:gap-3 overflow-auto scrollbar-hide">
                         {messages.map((msg, index) => (
-                            <div key={index} className={`${msg.sender._id === 'ai' ? 'max-w-80' : 'max-w-52'} ${msg.sender._id == user._id.toString() && 'ml-auto'}  message flex flex-col p-2 bg-slate-50 w-fit rounded-md`}>
-                                <small className='opacity-65 text-xs'>{msg.sender.email}</small>
+                            <div key={index} className={`${msg.sender._id === 'ai' ? 'max-w-full sm:max-w-80' : 'max-w-64 sm:max-w-72'} ${msg.sender._id == user._id.toString() && 'ml-auto'} message flex flex-col p-3 sm:p-4 ${msg.sender._id === 'ai' ? 'bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200' : msg.sender._id == user._id.toString() ? 'bg-gradient-to-br from-blue-500 to-purple-500 text-white' : 'bg-white border border-gray-200'} w-fit rounded-xl shadow-lg transform hover:scale-[1.02] transition-all duration-300`}>
+                                <small className={`${msg.sender._id == user._id.toString() ? 'text-white/80' : 'text-gray-500'} text-xs font-medium mb-1 truncate`}>{msg.sender.email}</small>
                                 <div className='text-sm'>
                                     {msg.sender._id === 'ai' ?
                                         WriteAiMessage(msg.message)
-                                        : <p>{msg.message}</p>}
+                                        : <p className="leading-relaxed break-words">{msg.message}</p>}
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <div className="inputField w-full flex absolute bottom-0">
+                    <div className="inputField w-full flex p-3 sm:p-4 gap-2">
                         <input
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
-                            className='p-2 px-4 border-none outline-none flex-grow' type="text" placeholder='Enter message' />
+                            onKeyPress={(e) => e.key === 'Enter' && send()}
+                            className='p-3 sm:p-4 px-4 sm:px-6 border-none outline-none flex-grow rounded-xl bg-white shadow-lg focus:shadow-xl transition-all duration-300 text-gray-700 placeholder-gray-400 text-sm sm:text-base' 
+                            type="text" 
+                            placeholder='Type your message...' />
                         <button
                             onClick={send}
-                            className='px-5 bg-slate-950 text-white'><i className="ri-send-plane-fill"></i></button>
+                            className='px-4 sm:px-6 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 min-w-fit'>
+                            <i className="ri-send-plane-fill text-base sm:text-lg"></i>
+                        </button>
                     </div>
                 </div>
-                <div className={`sidePanel w-full h-full flex flex-col gap-2 bg-slate-50 absolute transition-all ${isSidePanelOpen ? 'translate-x-0' : '-translate-x-full'} top-0`}>
-                    <header className='flex justify-between items-center px-4 p-2 bg-slate-200'>
 
-                        <h1
-                            className='font-semibold text-lg'
-                        >Collaborators</h1>
-
-                        <button onClick={() => setIsSidePanelOpen(!isSidePanelOpen)} className='p-2'>
-                            <i className="ri-close-fill"></i>
+                {/* Side Panel */}
+                <div className={`sidePanel w-full h-full flex flex-col gap-2 bg-gradient-to-b from-white/95 to-gray-50/95 backdrop-blur-sm absolute transition-all duration-500 ease-in-out ${isSidePanelOpen ? 'translate-x-0' : '-translate-x-full'} top-0 shadow-2xl z-10`}>
+                    <header className='flex justify-between items-center px-4 sm:px-6 p-3 sm:p-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg'>
+                        <h1 className='font-bold text-lg sm:text-xl'>Collaborators</h1>
+                        <button onClick={() => setIsSidePanelOpen(!isSidePanelOpen)} className='p-2 hover:bg-white/20 rounded-lg transition-all duration-300'>
+                            <i className="ri-close-fill text-lg sm:text-xl"></i>
                         </button>
                     </header>
-                    <div className="users flex flex-col gap-2">
-
-                        {project.users && project.users.map(user => {
-
-
+                    <div className="users flex flex-col gap-3 p-3 sm:p-4 overflow-auto">
+                        {project.users && project.users.map((user, index) => {
                             return (
-                                <div className="user cursor-pointer hover:bg-slate-200 p-2 flex gap-2 items-center">
-                                    <div className='aspect-square rounded-full w-fit h-fit flex items-center justify-center p-5 text-white bg-slate-600'>
-                                        <i className="ri-user-fill absolute"></i>
+                                <div key={index} className="user cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 p-3 sm:p-4 flex gap-3 sm:gap-4 items-center rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-sm hover:shadow-md border border-gray-100">
+                                    <div className='aspect-square rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-white bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg flex-shrink-0'>
+                                        <i className="ri-user-fill text-sm sm:text-lg"></i>
                                     </div>
-                                    <h1 className='font-semibold text-lg'>{user.email}</h1>
+                                    <h1 className='font-semibold text-base sm:text-lg text-gray-700 truncate'>{user.email}</h1>
                                 </div>
                             )
-
-
                         })}
                     </div>
                 </div>
             </section>
 
-            <section className="right  bg-red-50 flex-grow h-full flex">
-
-                <div className="explorer h-full max-w-64 min-w-52 bg-slate-200">
-                    <div className="file-tree w-full">
-                        {
-                            Object.keys(fileTree).map((file, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => {
-                                        setCurrentFile(file)
-                                        setOpenFiles([ ...new Set([ ...openFiles, file ]) ])
-                                    }}
-                                    className="tree-element cursor-pointer p-2 px-4 flex items-center gap-2 bg-slate-300 w-full">
-                                    <p
-                                        className='font-semibold text-lg'
-                                    >{file}</p>
-                                </button>))
-
-                        }
+            {/* Code Section */}
+            <section className={`${activeTab === 'code' ? 'flex' : 'hidden'} lg:flex bg-gradient-to-br from-gray-50 to-white flex-grow h-full shadow-inner`}>
+                <div className={`explorer h-full transition-all duration-300 ${isExplorerOpen ? 'w-full sm:w-64 sm:max-w-64 sm:min-w-52' : 'w-0 sm:w-12'} lg:max-w-64 lg:min-w-52 bg-gradient-to-b from-gray-800 to-gray-900 text-white shadow-xl overflow-hidden`}>
+                    {/* Explorer Header */}
+                    <div className="flex items-center justify-between p-2 sm:p-3 bg-gray-700/50 lg:hidden">
+                        <h3 className="text-sm font-bold text-gray-300">FILES</h3>
+                        <button 
+                            onClick={() => setIsExplorerOpen(!isExplorerOpen)}
+                            className="p-1 hover:bg-white/10 rounded transition-colors"
+                        >
+                            <i className={`ri-${isExplorerOpen ? 'close' : 'menu'}-line text-gray-300`}></i>
+                        </button>
                     </div>
 
+                    <div className={`file-tree w-full p-2 ${isExplorerOpen ? 'block' : 'hidden lg:block'}`}>
+                        <h3 className="text-sm font-bold text-gray-300 mb-3 px-2 hidden lg:block">FILES</h3>
+                        {
+                            Object.keys(fileTree).map((file, index) => (
+                                <div
+                                    key={index}
+                                    className="tree-element cursor-pointer p-2 sm:p-3 px-2 sm:px-4 flex items-center justify-between hover:bg-white/10 w-full rounded-lg transition-all duration-300 mb-1 group">
+                                    <div 
+                                        className="flex items-center gap-2 sm:gap-3 flex-grow min-w-0"
+                                        onClick={() => {
+                                            setCurrentFile(file)
+                                            setOpenFiles([ ...new Set([ ...openFiles, file ]) ])
+                                            setIsExplorerOpen(false) // Auto close on mobile
+                                        }}
+                                    >
+                                        <i className="ri-file-code-line text-blue-400 group-hover:text-blue-300 flex-shrink-0"></i>
+                                        <p className='font-medium text-gray-200 group-hover:text-white truncate text-sm sm:text-base'>{file}</p>
+                                    </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            if (window.confirm(`Are you sure you want to delete "${file}"?`)) {
+                                                const updatedFileTree = { ...fileTree }
+                                                delete updatedFileTree[file]
+                                                setFileTree(updatedFileTree)
+                                                saveFileTree(updatedFileTree)
+                                                
+                                                const updatedOpenFiles = openFiles.filter(f => f !== file)
+                                                setOpenFiles(updatedOpenFiles)
+                                                
+                                                if (currentFile === file) {
+                                                    setCurrentFile(updatedOpenFiles[0] || null)
+                                                }
+                                            }
+                                        }}
+                                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded text-red-400 hover:text-red-300 transition-all duration-300 flex-shrink-0"
+                                        title="Delete file"
+                                    >
+                                        <i className="ri-delete-bin-line text-xs sm:text-sm"></i>
+                                    </button>
+                                </div>))
+                        }
+                    </div>
                 </div>
 
-
-                <div className="code-editor flex flex-col flex-grow h-full shrink">
-
-                    <div className="top flex justify-between w-full">
-
-                        <div className="files flex">
+                <div className="code-editor flex flex-col flex-grow h-full bg-white min-w-0">
+                    <div className="top flex flex-col sm:flex-row justify-between w-full bg-gradient-to-r from-gray-100 to-gray-200 border-b border-gray-300 shadow-sm">
+                        <div className="files flex overflow-x-auto scrollbar-hide">
                             {
                                 openFiles.map((file, index) => (
                                     <button
                                         key={index}
                                         onClick={() => setCurrentFile(file)}
-                                        className={`open-file cursor-pointer p-2 px-4 flex items-center w-fit gap-2 bg-slate-300 ${currentFile === file ? 'bg-slate-400' : ''}`}>
-                                        <p
-                                            className='font-semibold text-lg'
-                                        >{file}</p>
+                                        className={`open-file cursor-pointer p-2 sm:p-3 px-3 sm:px-6 flex items-center gap-2 transition-all duration-300 font-medium text-sm sm:text-base whitespace-nowrap ${currentFile === file ? 'bg-white text-blue-600 border-b-2 border-blue-500 shadow-sm' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'}`}>
+                                        <i className="ri-file-code-line text-xs sm:text-sm flex-shrink-0"></i>
+                                        <p className='truncate max-w-20 sm:max-w-32'>{file}</p>
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                const updatedOpenFiles = openFiles.filter(f => f !== file)
+                                                setOpenFiles(updatedOpenFiles)
+                                                
+                                                if (currentFile === file) {
+                                                    setCurrentFile(updatedOpenFiles[0] || null)
+                                                }
+                                            }}
+                                            className="ml-1 sm:ml-2 text-xs hover:text-red-500 transition-colors flex-shrink-0"
+                                        >
+                                            ×
+                                        </button>
                                     </button>
                                 ))
                             }
                         </div>
 
-                        <div className="actions flex gap-2">
+                        <div className="actions flex gap-2 p-2 justify-center sm:justify-end">
                             <button
                                 onClick={async () => {
                                     await webContainer.mount(fileTree)
 
-
                                     const installProcess = await webContainer.spawn("npm", [ "install" ])
-
-
 
                                     installProcess.output.pipeTo(new WritableStream({
                                         write(chunk) {
@@ -330,29 +405,50 @@ const Project = () => {
                                     webContainer.on('server-ready', (port, url) => {
                                         console.log(port, url)
                                         setIframeUrl(url)
+                                        setActiveTab('preview') // Auto switch to preview on mobile
                                     })
-
                                 }}
-                                className='p-2 px-4 bg-slate-300 text-white'
+                                className='p-2 sm:p-3 px-4 sm:px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium text-sm sm:text-base'
                             >
-                                run
+                                <i className="ri-play-fill mr-1 sm:mr-2"></i>
+                                Run
                             </button>
-
-
+                            <button
+                                onClick={() => setIsExplorerOpen(!isExplorerOpen)}
+                                className='lg:hidden p-2 sm:p-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-300'
+                            >
+                                <i className="ri-folder-line"></i>
+                            </button>
                         </div>
                     </div>
-                    <div className="bottom flex flex-grow max-w-full shrink overflow-auto">
+
+                    <div className="bottom flex flex-grow max-w-full overflow-hidden">
                         {
                             fileTree[ currentFile ] && (
-                                <div className="code-editor-area h-full overflow-auto flex-grow bg-slate-50">
-                                    <pre
-                                        className="hljs h-full">
-                                        <code
-                                            className="hljs h-full outline-none"
-                                            contentEditable
-                                            suppressContentEditableWarning
-                                            onBlur={(e) => {
-                                                const updatedContent = e.target.innerText;
+                                <div className="code-editor-area h-full overflow-auto flex-grow bg-gradient-to-br from-gray-900 to-gray-800 relative">
+                                    <div className="absolute inset-0 flex">
+                                        <pre className="hljs h-full flex-grow pointer-events-none absolute inset-0 z-0">
+                                            <code
+                                                className="hljs block h-full"
+                                                dangerouslySetInnerHTML={{ 
+                                                    __html: hljs.highlight('javascript', fileTree[ currentFile ].file.contents).value 
+                                                }}
+                                                style={{
+                                                    whiteSpace: 'pre-wrap',
+                                                    paddingBottom: '25rem',
+                                                    counterSet: 'line-numbering',
+                                                    padding: window.innerWidth < 640 ? '1rem' : '2rem',
+                                                    fontSize: window.innerWidth < 640 ? '12px' : '14px',
+                                                    lineHeight: '1.6',
+                                                    color: 'transparent'
+                                                }}
+                                            />
+                                        </pre>
+                                        <textarea
+                                            className="hljs h-full flex-grow resize-none outline-none bg-transparent relative z-10 font-mono"
+                                            value={fileTree[ currentFile ].file.contents}
+                                            onChange={(e) => {
+                                                const updatedContent = e.target.value;
                                                 const ft = {
                                                     ...fileTree,
                                                     [ currentFile ]: {
@@ -362,61 +458,112 @@ const Project = () => {
                                                     }
                                                 }
                                                 setFileTree(ft)
-                                                saveFileTree(ft)
                                             }}
-                                            dangerouslySetInnerHTML={{ __html: hljs.highlight('javascript', fileTree[ currentFile ].file.contents).value }}
+                                            onBlur={() => {
+                                                saveFileTree(fileTree)
+                                            }}
                                             style={{
                                                 whiteSpace: 'pre-wrap',
                                                 paddingBottom: '25rem',
                                                 counterSet: 'line-numbering',
+                                                padding: window.innerWidth < 640 ? '1rem' : '2rem',
+                                                fontSize: window.innerWidth < 640 ? '12px' : '14px',
+                                                lineHeight: '1.6',
+                                                color: 'white',
+                                                caretColor: 'white',
+                                                background: 'transparent'
                                             }}
+                                            spellCheck={false}
                                         />
-                                    </pre>
+                                    </div>
                                 </div>
                             )
                         }
                     </div>
-
                 </div>
-
-                {iframeUrl && webContainer &&
-                    (<div className="flex min-w-96 flex-col h-full">
-                        <div className="address-bar">
-                            <input type="text"
-                                onChange={(e) => setIframeUrl(e.target.value)}
-                                value={iframeUrl} className="w-full p-2 px-4 bg-slate-200" />
-                        </div>
-                        <iframe src={iframeUrl} className="w-full h-full"></iframe>
-                    </div>)
-                }
-
-
             </section>
 
+            {/* Preview Section */}
+            {iframeUrl && webContainer && (
+                <div className={`${activeTab === 'preview' ? 'flex' : 'hidden'} lg:flex flex-col h-full w-full lg:min-w-96 lg:max-w-2xl border-l border-gray-200 bg-white shadow-xl`}>
+                    <div className="address-bar bg-gradient-to-r from-gray-100 to-gray-200 p-2 sm:p-3 border-b border-gray-300">
+                        <div className="flex items-center gap-2">
+                            <i className="ri-global-line text-gray-500 flex-shrink-0"></i>
+                            <input type="text"
+                                onChange={(e) => setIframeUrl(e.target.value)}
+                                value={iframeUrl} 
+                                className="flex-grow p-2 px-3 sm:px-4 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-sm sm:text-base min-w-0" 
+                                placeholder="Enter URL..." />
+                        </div>
+                    </div>
+                    <iframe src={iframeUrl} className="w-full h-full bg-white"></iframe>
+                </div>
+            )}
+
+            {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-4 rounded-md w-96 max-w-full relative">
-                        <header className='flex justify-between items-center mb-4'>
-                            <h2 className='text-xl font-semibold'>Select User</h2>
-                            <button onClick={() => setIsModalOpen(false)} className='p-2'>
-                                <i className="ri-close-fill"></i>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start sm:items-center justify-center z-50 animate-in fade-in duration-300 p-2 sm:p-4 overflow-y-auto">
+                    <div className="bg-white rounded-2xl w-full max-w-sm sm:max-w-md lg:max-w-lg relative shadow-2xl transform animate-in zoom-in-95 duration-300 flex flex-col my-4 sm:my-8 min-h-0 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)]">
+                        {/* Fixed Header */}
+                        <header className='flex justify-between items-center p-4 sm:p-6 border-b border-gray-100 flex-shrink-0'>
+                            <h2 className='text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>Select Users</h2>
+                            <button onClick={() => setIsModalOpen(false)} className='p-2 hover:bg-gray-100 rounded-lg transition-all duration-300 flex-shrink-0'>
+                                <i className="ri-close-fill text-lg sm:text-xl text-gray-600"></i>
                             </button>
                         </header>
-                        <div className="users-list flex flex-col gap-2 mb-16 max-h-96 overflow-auto">
-                            {users.map(user => (
-                                <div key={user.id} className={`user cursor-pointer hover:bg-slate-200 ${Array.from(selectedUserId).indexOf(user._id) != -1 ? 'bg-slate-200' : ""} p-2 flex gap-2 items-center`} onClick={() => handleUserClick(user._id)}>
-                                    <div className='aspect-square relative rounded-full w-fit h-fit flex items-center justify-center p-5 text-white bg-slate-600'>
-                                        <i className="ri-user-fill absolute"></i>
+                        
+                        {/* Scrollable Content */}
+                        <div className="flex-grow overflow-y-auto p-4 sm:p-6 min-h-0">
+                            <div className="users-list flex flex-col gap-2 sm:gap-3">
+                                {users.length > 0 ? users.map(user => (
+                                    <div key={user._id || user.id} className={`user cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 ${Array.from(selectedUserId).indexOf(user._id) != -1 ? 'bg-gradient-to-r from-blue-100 to-purple-100 border-2 border-blue-300' : "border border-gray-200"} p-3 sm:p-4 flex gap-3 sm:gap-4 items-center rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-sm hover:shadow-md`} onClick={() => handleUserClick(user._id)}>
+                                        <div className='aspect-square relative rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-white bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg flex-shrink-0'>
+                                            <i className="ri-user-fill text-sm sm:text-lg"></i>
+                                            {Array.from(selectedUserId).indexOf(user._id) != -1 && (
+                                                <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full flex items-center justify-center">
+                                                    <i className="ri-check-fill text-green-500 text-xs"></i>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-grow min-w-0">
+                                            <h1 className='font-semibold text-sm sm:text-base lg:text-lg text-gray-700 truncate'>{user.email}</h1>
+                                            {user.name && (
+                                                <p className='text-xs sm:text-sm text-gray-500 truncate'>{user.name}</p>
+                                            )}
+                                        </div>
                                     </div>
-                                    <h1 className='font-semibold text-lg'>{user.email}</h1>
-                                </div>
-                            ))}
+                                )) : (
+                                    <div className="text-center py-8">
+                                        <i className="ri-user-line text-4xl text-gray-300 mb-2"></i>
+                                        <p className="text-gray-500">No users available</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                        <button
-                            onClick={addCollaborators}
-                            className='absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-blue-600 text-white rounded-md'>
-                            Add Collaborators
-                        </button>
+                        
+                        {/* Fixed Footer */}
+                        <div className="border-t border-gray-100 p-4 sm:p-6 flex-shrink-0">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                <button
+                                    onClick={() => setIsModalOpen(false)}
+                                    className='flex-1 px-4 sm:px-6 py-2 sm:py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 text-sm sm:text-base'
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={addCollaborators}
+                                    disabled={selectedUserId.size === 0}
+                                    className={`flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 transform text-sm sm:text-base ${
+                                        selectedUserId.size > 0 
+                                            ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-xl hover:from-blue-600 hover:to-purple-600 hover:scale-105' 
+                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                >
+                                    <i className="ri-user-add-line mr-1 sm:mr-2"></i>
+                                    Add {selectedUserId.size > 0 && `(${selectedUserId.size})`}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

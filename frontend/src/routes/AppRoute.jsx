@@ -5,12 +5,14 @@ import Register from "../screens/Register";
 import Home from "../screens/Home";
 import Project from "../screens/Project.jsx";
 import UserAuth from "../auth/UserAuth";
+import LandingPage from "../screens/LandingPage.jsx";
 
 const AppRoutes = () => {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<UserAuth><Home/></UserAuth>} />
+                <Route path="/" element={<LandingPage />} />
+            <Route path="/Home" element={<UserAuth><Home /></UserAuth>} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register/>} />
                 <Route path="/project" element={<UserAuth><Project /></UserAuth>} />
