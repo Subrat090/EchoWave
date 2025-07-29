@@ -52,20 +52,20 @@ const LandingPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-16 sm:mb-20 animate-in slide-in-from-bottom duration-1000 delay-700">
           <div className="group bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 sm:p-8 hover:bg-white/10 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-xl hover:shadow-2xl">
             <div className="text-4xl sm:text-5xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">⚡</div>
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-3 group-hover:text-purple-300 transition-colors">Real-time Sync</h3>
-            <p className="text-slate-400 group-hover:text-slate-300 transition-colors text-sm sm:text-base">Experience lightning-fast collaborative editing with zero latency</p>
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-3 group-hover:text-purple-300 transition-colors">Real-time Chat</h3>
+            <p className="text-slate-400 group-hover:text-slate-300 transition-colors text-sm sm:text-base">Experience lightning-fast messaging with team members in real-time</p>
             <div className="mt-4 h-1 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
           <div className="group bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 sm:p-8 hover:bg-white/10 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-xl hover:shadow-2xl">
             <div className="text-4xl sm:text-5xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">🤖</div>
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-3 group-hover:text-cyan-300 transition-colors">AI-Enhanced</h3>
-            <p className="text-slate-400 group-hover:text-slate-300 transition-colors text-sm sm:text-base">Intelligent code completion and smart suggestions powered by advanced AI</p>
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-3 group-hover:text-cyan-300 transition-colors">AI Code Assistant</h3>
+            <p className="text-slate-400 group-hover:text-slate-300 transition-colors text-sm sm:text-base">Get intelligent code suggestions and project generation with @ai commands</p>
             <div className="mt-4 h-1 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
           <div className="group bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 sm:p-8 hover:bg-white/10 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-xl hover:shadow-2xl sm:col-span-2 lg:col-span-1">
             <div className="text-4xl sm:text-5xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">🚀</div>
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-3 group-hover:text-blue-300 transition-colors">Instant Deploy</h3>
-            <p className="text-slate-400 group-hover:text-slate-300 transition-colors text-sm sm:text-base">Preview and deploy your projects with one click to global CDN</p>
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-3 group-hover:text-blue-300 transition-colors">Live Preview</h3>
+            <p className="text-slate-400 group-hover:text-slate-300 transition-colors text-sm sm:text-base">Run and preview your projects instantly with WebContainer technology</p>
             <div className="mt-4 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
         </div>
@@ -101,19 +101,19 @@ const LandingPage = () => {
             <ul className="text-slate-300 space-y-3 sm:space-y-4">
               <li className="flex items-center group hover:text-white transition-colors">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-3 group-hover:bg-green-300"></div>
-                Real-time multi-cursor editing
+                Real-time messaging with team members
               </li>
               <li className="flex items-center group hover:text-white transition-colors">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-3 group-hover:bg-green-300"></div>
-                Integrated voice & video chat
+                Add collaborators to projects
               </li>
               <li className="flex items-center group hover:text-white transition-colors">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-3 group-hover:bg-green-300"></div>
-                Smart project sharing & permissions
+                Secure user authentication
               </li>
               <li className="flex items-center group hover:text-white transition-colors">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-3 group-hover:bg-green-300"></div>
-                Advanced conflict resolution
+                Project-based team management
               </li>
             </ul>
           </div>
@@ -122,24 +122,24 @@ const LandingPage = () => {
               <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center mr-4">
                 <i className="ri-code-s-slash-line text-xl text-white"></i>
               </div>
-              Powerful Editor
+              Code Editor
             </h3>
             <ul className="text-slate-300 space-y-3 sm:space-y-4">
               <li className="flex items-center group hover:text-white transition-colors">
                 <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 group-hover:bg-cyan-300"></div>
-                Advanced syntax highlighting
+                Syntax highlighting with highlight.js
               </li>
               <li className="flex items-center group hover:text-white transition-colors">
                 <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 group-hover:bg-cyan-300"></div>
-                Intelligent auto-completion
+                Multi-file project structure
               </li>
               <li className="flex items-center group hover:text-white transition-colors">
                 <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 group-hover:bg-cyan-300"></div>
-                Multi-language support
+                File tree management
               </li>
               <li className="flex items-center group hover:text-white transition-colors">
                 <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 group-hover:bg-cyan-300"></div>
-                Built-in terminal & debugger
+                Real-time code execution
               </li>
             </ul>
           </div>
@@ -147,18 +147,18 @@ const LandingPage = () => {
         {/* Enhanced Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 mb-16 sm:mb-20 animate-in slide-in-from-bottom duration-1000 delay-1400">
           <div className="text-center bg-white/5 backdrop-blur-lg rounded-3xl p-6 sm:p-8 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
-            <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">25K+</div>
-            <div className="text-slate-400 group-hover:text-slate-300 transition-colors font-medium">Active Developers</div>
+            <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">Real-time</div>
+            <div className="text-slate-400 group-hover:text-slate-300 transition-colors font-medium">Socket.io Chat</div>
             <div className="w-12 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mx-auto mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
           <div className="text-center bg-white/5 backdrop-blur-lg rounded-3xl p-6 sm:p-8 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
-            <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">100K+</div>
-            <div className="text-slate-400 group-hover:text-slate-300 transition-colors font-medium">Projects Created</div>
+            <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">AI-Powered</div>
+            <div className="text-slate-400 group-hover:text-slate-300 transition-colors font-medium">Gemini Integration</div>
             <div className="w-12 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full mx-auto mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
           <div className="text-center bg-white/5 backdrop-blur-lg rounded-3xl p-6 sm:p-8 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
-            <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">99.99%</div>
-            <div className="text-slate-400 group-hover:text-slate-300 transition-colors font-medium">Uptime SLA</div>
+            <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">WebContainer</div>
+            <div className="text-slate-400 group-hover:text-slate-300 transition-colors font-medium">Live Execution</div>
             <div className="w-12 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mx-auto mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
         </div>
@@ -169,21 +169,21 @@ const LandingPage = () => {
               Ready to revolutionize your development workflow?
             </p>
             <p className="text-slate-400 text-sm sm:text-base">
-              Join thousands of developers worldwide who are already building the future with EchoWave.
+              Join developers worldwide who are already building the future with EchoWave.
             </p>
             {/* Social proof badges */}
             <div className="flex flex-wrap justify-center gap-4 mt-6">
               <div className="flex items-center bg-white/10 rounded-full px-4 py-2 text-xs sm:text-sm text-slate-300">
                 <i className="ri-shield-check-line text-green-400 mr-2"></i>
-                SOC 2 Compliant
+                JWT Authentication
               </div>
               <div className="flex items-center bg-white/10 rounded-full px-4 py-2 text-xs sm:text-sm text-slate-300">
                 <i className="ri-lock-line text-blue-400 mr-2"></i>
-                Enterprise Security
+                MongoDB Security
               </div>
               <div className="flex items-center bg-white/10 rounded-full px-4 py-2 text-xs sm:text-sm text-slate-300">
                 <i className="ri-global-line text-purple-400 mr-2"></i>
-                Global CDN
+                Real-time Sync
               </div>
             </div>
           </div>
