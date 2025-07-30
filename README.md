@@ -5,10 +5,13 @@
 [![Socket.io](https://img.shields.io/badge/Socket.io-4.8.1-orange.svg)](https://socket.io/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-blue.svg)](https://mongodb.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-3.4.17-38B2AC.svg)](https://tailwindcss.com/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-EchoWave-green.svg)](https://echo-wave-theta.vercel.app/)
 
 ## 🚀 About EchoWave
 
 EchoWave is a next-generation real-time collaborative coding platform that enables teams to work together seamlessly on coding projects. Built with modern web technologies, it provides an integrated development environment with AI-powered assistance, real-time chat, and live code preview capabilities.
+
+**🌐 Live Demo:** [https://echo-wave-theta.vercel.app/](https://echo-wave-theta.vercel.app/)
 
 ### ✨ Key Features
 
@@ -56,8 +59,8 @@ Before running this project, make sure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/echowave.git
-cd echowave
+git clone https://github.com/Subrat090/EchoWave.git
+cd EchoWave
 ```
 
 ### 2. Backend Setup
@@ -181,10 +184,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Google Generative AI](https://ai.google.dev/) for AI-powered assistance
 - [Tailwind CSS](https://tailwindcss.com/) for the beautiful UI
 
+## 👨‍💻 Developer
+
+**Subrat Mahapatro** - Full-Stack Developer | React • Node.js • AI Enthusiast
+
+- **GitHub:** [@Subrat090](https://github.com/Subrat090)
+- **Portfolio:** [GitHub Profile](https://github.com/Subrat090)
+- **Live Demo:** [EchoWave App](https://echo-wave-theta.vercel.app/)
+
 ## 📞 Support
 
 If you have any questions or need support, please open an issue on GitHub or contact the development team.
 
 ---
 
-**Built with ❤️ by the EchoWave Team** 
+**Built with ❤️ by [Subrat Mahapatro](https://github.com/Subrat090)** 
