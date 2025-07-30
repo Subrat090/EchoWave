@@ -251,21 +251,6 @@ Special thanks to the following technologies and services that made EchoWave pos
 
 ---
 
-## 👨‍💻 Developer
-
-<div align="center">
-
-### **Subrat Mahapatro**
-*Full-Stack Developer | React • Node.js • AI Enthusiast*
-
-[![GitHub](https://img.shields.io/badge/GitHub-@Subrat090-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Subrat090)
-[![Portfolio](https://img.shields.io/badge/Portfolio-GitHub_Profile-FF6B6B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Subrat090)
-[![Live Demo](https://img.shields.io/badge/Live_Demo-EchoWave_App-4CAF50?style=for-the-badge&logo=vercel&logoColor=white)](https://echo-wave-theta.vercel.app/)
-
-</div>
-
----
-
 ## 📞 Support
 
 If you have any questions or need support, please:
